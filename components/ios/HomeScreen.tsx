@@ -2,7 +2,8 @@
 
 import { User, Briefcase, Code, Star, Wrench, Mail, Phone } from "lucide-react";
 import AppIcon from "./AppIcon";
-import { AppType } from "@/app/ios/page";
+
+export type AppType = "about" | "work" | "sandbox" | "reviews" | "skills" | "contact";
 
 interface HomeScreenProps {
   openApp: (app: AppType) => void;
