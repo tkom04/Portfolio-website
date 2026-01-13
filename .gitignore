@@ -43,3 +43,9 @@ next-env.d.ts
 *.7z
 *.dmg
 
+# helper scripts (not needed for deployment)
+download_*.ps1
+find_*.ps1
+push_to_github.ps1
+CREATE_GITHUB_REPO.md
+
