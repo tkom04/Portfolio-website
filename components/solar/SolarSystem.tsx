@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { CSS2DRenderer, CSS2DObject } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { Star, Briefcase, Rocket, Sparkles, Pencil, Lightbulb, Moon, AlertTriangle, Clipboard, MousePointer2, Search, Hand, Zap, Palette, Wrench, TrendingUp, Settings, Cpu } from "lucide-react";
+import PlanetThumbnail from "./PlanetThumbnail";
 
 type PlanetType = "sun" | "about" | "skills" | "projects" | "sandbox" | "reviews" | "contact" | "devlogs" | "lights";
 
@@ -129,14 +131,19 @@ export default function SolarSystem() {
     const stars = new THREE.Points(starGeometry, starMaterial);
     scene.add(stars);
 
-    // Ambient light
-    const ambientLight = new THREE.AmbientLight(0x404040, 1);
+    // Ambient light - increased for brighter planets
+    const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
     scene.add(ambientLight);
 
-    // Point light from sun
-    const sunLight = new THREE.PointLight(0xffffff, 2, 100);
+    // Point light from sun - increased intensity
+    const sunLight = new THREE.PointLight(0xffffff, 3, 100);
     sunLight.position.set(0, 0, 0);
     scene.add(sunLight);
+    
+    // Additional directional light for better planet visibility
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
 
     // Create planets
     planetMeshesRef.current = [];
@@ -170,7 +177,9 @@ export default function SolarSystem() {
           bumpMap: bumpMap,
           bumpScale: 0.05,
           metalness: 0.1,
-          roughness: 0.9,
+          roughness: 0.8,
+          emissive: planet.color,
+          emissiveIntensity: 0.15,
         });
       } else if (planet.type === "sandbox") {
         // Mars with detailed textures
@@ -181,7 +190,9 @@ export default function SolarSystem() {
           bumpMap: bumpMap,
           bumpScale: 0.02,
           metalness: 0.1,
-          roughness: 0.95,
+          roughness: 0.85,
+          emissive: planet.color,
+          emissiveIntensity: 0.15,
         });
       } else if (planet.type === "skills") {
         // Venus with detailed textures
@@ -192,16 +203,18 @@ export default function SolarSystem() {
           bumpMap: bumpMap,
           bumpScale: 0.01,
           metalness: 0.2,
-          roughness: 0.8,
+          roughness: 0.7,
+          emissive: planet.color,
+          emissiveIntensity: 0.2,
         });
       } else {
         // Default colored material for other planets
         material = new THREE.MeshStandardMaterial({
           color: planet.color,
-          emissive: planet.type === "sun" ? planet.color : "#000000",
-          emissiveIntensity: planet.type === "sun" ? 0.5 : 0,
+          emissive: planet.type === "sun" ? planet.color : planet.color,
+          emissiveIntensity: planet.type === "sun" ? 0.5 : 0.2,
           metalness: 0.4,
-          roughness: 0.7,
+          roughness: 0.6,
         });
       }
 
@@ -263,6 +276,26 @@ export default function SolarSystem() {
             model.traverse((child) => {
               if (child instanceof THREE.Mesh) {
                 meshes.push(child);
+                
+                // Brighten GLTF model materials
+                if (child.material) {
+                  const materials = Array.isArray(child.material) ? child.material : [child.material];
+                  materials.forEach((mat: any) => {
+                    if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshPhysicalMaterial) {
+                      // Add subtle emissive glow
+                      if (!mat.emissive) {
+                        mat.emissive = new THREE.Color(planet.color);
+                      } else {
+                        mat.emissive.set(planet.color);
+                      }
+                      mat.emissiveIntensity = planet.type === "sun" ? 0.5 : 0.2;
+                      // Reduce roughness for more reflectivity/brightness
+                      if (mat.roughness !== undefined) {
+                        mat.roughness = Math.max(0.3, (mat.roughness || 0.7) * 0.8);
+                      }
+                    }
+                  });
+                }
               }
             });
             
@@ -511,10 +544,10 @@ export default function SolarSystem() {
       
       const intersects = raycaster.intersectObjects(planetObjects);
 
-      if (intersects.length > 0 && intersects[0].object.userData.planet) {
-        const planet = intersects[0].object.userData.planet;
-        setSelectedPlanet(planet);
-      }
+        if (intersects.length > 0 && intersects[0].object.userData.planet) {
+          const planet = intersects[0].object.userData.planet;
+          setSelectedPlanet(planet);
+        }
       }
     };
 
@@ -665,9 +698,12 @@ export default function SolarSystem() {
       {/* UI Overlay */}
       <div className="fixed top-8 left-8 text-white z-10">
         <h1 className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-          Solar Portfolio
+          Rhys Bone
         </h1>
-        <p className="text-gray-400">Click on a planet to explore</p>
+        <p className="text-gray-400">
+          Portfolio<br />
+          Click on a planet to explore
+        </p>
       </div>
 
       {/* Planet Labels */}
@@ -768,7 +804,7 @@ export default function SolarSystem() {
                   {/* IT & Infrastructure */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
-                      <span>🔧</span> IT & Infrastructure
+                      <Settings className="w-5 h-5 text-blue-400" /> IT & Infrastructure
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {["PC building and optimization", "VR streaming technologies", "Remote access solutions", "Network deployment", "Windows/Linux administration"].map((skill) => (
@@ -782,7 +818,7 @@ export default function SolarSystem() {
                   {/* Other Competencies */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
-                      <span>⚡</span> Other Technical Competencies
+                      <Zap className="w-5 h-5 text-yellow-400" /> Other Technical Competencies
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {["Web design", "Shopify themes", "Game emulation", "Video editing", "Projection mapping", "AI tool integration", "Database management", "API development"].map((skill) => (
@@ -796,7 +832,7 @@ export default function SolarSystem() {
                   {/* Soft Skills */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
-                      <span>🌟</span> Soft Skills
+                      <Star className="w-5 h-5 text-yellow-400" /> Soft Skills
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {["Problem-solving", "Technical research", "Self-learning", "Budget planning"].map((skill) => (
@@ -812,7 +848,7 @@ export default function SolarSystem() {
                   {/* Client Project */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                      <span>💼</span> Client Work
+                      <Briefcase className="w-5 h-5 text-blue-400" /> Client Work
                     </h3>
                     <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/20">
                       <div className="flex items-start justify-between mb-4">
@@ -855,7 +891,7 @@ export default function SolarSystem() {
                   {/* Personal Projects */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                      <span>🚀</span> Personal Projects
+                      <Rocket className="w-5 h-5 text-purple-400" /> Personal Projects
                     </h3>
                     <div className="space-y-4">
                       {/* This Portfolio */}
@@ -890,26 +926,26 @@ export default function SolarSystem() {
                   {/* Project Highlights */}
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                      <span>✨</span> What I Bring to Projects
+                      <Sparkles className="w-5 h-5 text-yellow-400" /> What I Bring to Projects
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
-                        <div className="text-2xl mb-2">⚡</div>
+                        <div className="flex justify-center mb-2"><Zap className="w-6 h-6 text-yellow-400" /></div>
                         <p className="text-sm font-medium text-white">Automation</p>
                         <p className="text-xs text-gray-400 mt-1">Streamlined workflows</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
-                        <div className="text-2xl mb-2">🎨</div>
+                        <div className="flex justify-center mb-2"><Palette className="w-6 h-6 text-purple-400" /></div>
                         <p className="text-sm font-medium text-white">Full Stack</p>
                         <p className="text-xs text-gray-400 mt-1">End-to-end solutions</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
-                        <div className="text-2xl mb-2">🔧</div>
+                        <div className="flex justify-center mb-2"><Wrench className="w-6 h-6 text-blue-400" /></div>
                         <p className="text-sm font-medium text-white">Problem Solving</p>
                         <p className="text-xs text-gray-400 mt-1">Creative solutions</p>
                       </div>
                       <div className="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
-                        <div className="text-2xl mb-2">📈</div>
+                        <div className="flex justify-center mb-2"><TrendingUp className="w-6 h-6 text-green-400" /></div>
                         <p className="text-sm font-medium text-white">Results Focused</p>
                         <p className="text-xs text-gray-400 mt-1">Measurable impact</p>
                       </div>
@@ -1102,7 +1138,7 @@ export default function SolarSystem() {
                   {/* Name Input Section */}
                   <div className="bg-white/5 rounded-xl p-6 border border-white/10">
                     <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                      <span>✏️</span> Would you like to name yourself?
+                      <Pencil className="w-5 h-5 text-cyan-400" /> Would you like to name yourself?
                     </h4>
                     <input
                       type="text"
@@ -1119,8 +1155,12 @@ export default function SolarSystem() {
 
                   {/* Lights Status */}
                   <div className={`bg-gradient-to-br ${lightsOn ? 'from-yellow-500/20 to-orange-500/20' : 'from-gray-500/20 to-gray-600/20'} rounded-xl p-8 border ${lightsOn ? 'border-yellow-500/30' : 'border-gray-500/30'} text-center`}>
-                    <div className="text-6xl mb-4">
-                      {lightsOn ? '💡' : '🌙'}
+                    <div className="mb-4 flex justify-center">
+                      {lightsOn ? (
+                        <Lightbulb className="w-16 h-16 text-yellow-400" />
+                      ) : (
+                        <Moon className="w-16 h-16 text-gray-400" />
+                      )}
                     </div>
                     <h4 className="text-2xl font-bold text-white mb-2">
                       Lights {lightsOn ? 'ON' : 'OFF'}
@@ -1210,8 +1250,8 @@ export default function SolarSystem() {
                       }
                     </button>
                     {lightsError && (
-                      <p className="text-red-400 text-sm mt-2 text-center">
-                        ⚠️ {lightsError}
+                      <p className="text-red-400 text-sm mt-2 text-center flex items-center justify-center gap-2">
+                        <AlertTriangle className="w-4 h-4" /> {lightsError}
                       </p>
                     )}
                   </div>
@@ -1219,7 +1259,7 @@ export default function SolarSystem() {
                   {/* Activity Log */}
                   <div>
                     <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <span>📋</span> Activity Log
+                      <Clipboard className="w-5 h-5 text-blue-400" /> Activity Log
                       <span className="text-sm text-gray-400 font-normal">
                         ({lightsLog.length} {lightsLog.length === 1 ? 'action' : 'actions'})
                       </span>
@@ -1254,18 +1294,18 @@ export default function SolarSystem() {
                   </div>
 
                   <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-4 border border-blue-500/20">
-                    <p className="text-gray-300 text-xs leading-relaxed">
-                      💡 This is connected to my Home Assistant setup. Every toggle is logged and 
-                      I get a notification when someone interacts with it. Pretty cool, right?
+                    <p className="text-gray-300 text-xs leading-relaxed flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" /> 
+                      <span>This is connected to my Home Assistant setup. Every toggle is logged and I get a notification when someone interacts with it. Pretty cool, right?</span>
                     </p>
                   </div>
                 </div>
               ) : (
                 <>
-                  <p>Content for {selectedPlanet.label} coming soon...</p>
-                  <p className="text-sm text-gray-500">
-                    Planet: {selectedPlanet.name} • {selectedPlanet.label}
-                  </p>
+              <p>Content for {selectedPlanet.label} coming soon...</p>
+              <p className="text-sm text-gray-500">
+                Planet: {selectedPlanet.name} • {selectedPlanet.label}
+              </p>
                 </>
               )}
             </div>
@@ -1312,12 +1352,10 @@ export default function SolarSystem() {
                   }}
                 >
                   <div className="flex items-center gap-4 mb-3">
-                    <div
-                      className="w-12 h-12 rounded-full flex-shrink-0"
-                      style={{
-                        background: `radial-gradient(circle at 30% 30%, ${planet.color}, ${planet.color}dd)`,
-                        boxShadow: `0 0 20px ${planet.color}80`,
-                      }}
+                    <PlanetThumbnail 
+                      planetType={planet.type} 
+                      planetColor={planet.color} 
+                      size={48}
                     />
                     <div className="flex-1">
                       <h4 className="text-white font-bold">{planet.label}</h4>
@@ -1325,7 +1363,14 @@ export default function SolarSystem() {
                     </div>
                   </div>
                   <p className="text-gray-300 text-sm mb-3">
-                    Explore my {planet.label.toLowerCase()} and see what I can do.
+                    {planet.type === "about" && "22-year-old automation expert & full stack developer. Passionate about neural networks, Home Assistant, and circuit boards."}
+                    {planet.type === "skills" && "Full stack development, automation scripting, network infrastructure, system administration, and 3D modeling with Blender."}
+                    {planet.type === "projects" && "Etched Reflection Shopify store (client work) and this interactive 3D solar system portfolio built with Next.js & Three.js."}
+                    {planet.type === "sandbox" && "Experimental projects and creative demos. A space for testing new ideas and pushing boundaries."}
+                    {planet.type === "reviews" && "5-star client testimonial from Etched Reflection. See what clients say about working with me."}
+                    {planet.type === "contact" && "Email: Hello@orbit.tech • Phone: 07506 902372 • Available for remote work worldwide. Let's create something amazing!"}
+                    {planet.type === "devlogs" && "Development updates and behind-the-scenes. Currently featuring the Solar System Portfolio build process."}
+                    {planet.type === "lights" && "Control my Home Assistant lights from anywhere! Every toggle is logged and I get notified. Try it out!"}
                   </p>
                   <button className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors text-sm font-semibold">
                     Learn More
@@ -1351,12 +1396,10 @@ export default function SolarSystem() {
               onClick={() => setSelectedPlanet(planet)}
             >
               <div className="flex items-center gap-4 mb-3">
-                <div
-                  className="w-12 h-12 rounded-full"
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, ${planet.color}, ${planet.color}dd)`,
-                    boxShadow: `0 0 20px ${planet.color}80`,
-                  }}
+                <PlanetThumbnail 
+                  planetType={planet.type} 
+                  planetColor={planet.color} 
+                  size={48}
                 />
                 <div className="flex-1">
                   <h4 className="text-white font-bold">{planet.label}</h4>
@@ -1458,9 +1501,9 @@ export default function SolarSystem() {
       {/* Controls Help - Repositioned */}
       <div className="hidden lg:block fixed bottom-28 left-8 bg-black/60 backdrop-blur-md px-4 py-3 rounded-lg border border-white/10 text-white text-sm z-10">
         <p className="font-semibold mb-2">Controls:</p>
-        <p>🖱️ Drag to rotate</p>
-        <p>🔍 Scroll to zoom</p>
-        <p>👆 Click planet to view</p>
+        <p className="flex items-center gap-2"><MousePointer2 className="w-4 h-4" /> Drag to rotate</p>
+        <p className="flex items-center gap-2"><Search className="w-4 h-4" /> Scroll to zoom</p>
+        <p className="flex items-center gap-2"><Hand className="w-4 h-4" /> Click planet to view</p>
       </div>
     </>
   );

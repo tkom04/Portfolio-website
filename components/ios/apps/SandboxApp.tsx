@@ -1,7 +1,7 @@
 "use client";
 
 import AppContainer from "../AppContainer";
-import { Play, Code2, Sparkles } from "lucide-react";
+import { Play, Code2, Sparkles, Lightbulb } from "lucide-react";
 
 interface SandboxAppProps {
   closeApp: () => void;
@@ -95,7 +95,7 @@ export default function SandboxApp({ closeApp, isAnimating }: SandboxAppProps) {
 
         <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl p-6 shadow-sm border-2 border-yellow-200">
           <div className="flex items-start gap-3">
-            <div className="text-2xl">💡</div>
+            <Lightbulb className="w-6 h-6 text-yellow-500" />
             <div>
               <h4 className="font-semibold text-gray-900 mb-1">
                 Always Experimenting
