@@ -1407,7 +1407,14 @@ export default function SolarSystem() {
                 </div>
               </div>
               <p className="text-gray-300 text-sm mb-3">
-                Explore my {planet.label.toLowerCase()} and see what I can do.
+                {planet.type === "about" && "22-year-old automation expert & full stack developer. Passionate about neural networks, Home Assistant, and circuit boards."}
+                {planet.type === "skills" && "Full stack development, automation scripting, network infrastructure, system administration, and 3D modeling with Blender."}
+                {planet.type === "projects" && "Etched Reflection Shopify store (client work) and this interactive 3D solar system portfolio built with Next.js & Three.js."}
+                {planet.type === "sandbox" && "Experimental projects and creative demos. A space for testing new ideas and pushing boundaries."}
+                {planet.type === "reviews" && "5-star client testimonial from Etched Reflection. See what clients say about working with me."}
+                {planet.type === "contact" && "Email: Hello@orbit.tech • Phone: 07506 902372 • Available for remote work worldwide. Let's create something amazing!"}
+                {planet.type === "devlogs" && "Development updates and behind-the-scenes. Currently featuring the Solar System Portfolio build process."}
+                {planet.type === "lights" && "Control my Home Assistant lights from anywhere! Every toggle is logged and I get notified. Try it out!"}
               </p>
               <button className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors text-sm font-semibold group-hover:gap-3">
                 Learn More
